@@ -55,8 +55,8 @@ func mapProperties(appMaps map[string]interface{}) map[string]string {
 }
 
 func usage() {
-	log.Fatal("Usage: " + os.Args[0] + " FILENAME")
-	log.Fatal("Build Commit: " + commitVersion)
+	fmt.Fprintln(os.Stderr, "Usage: "+os.Args[0]+" FILENAME")
+	fmt.Fprintln(os.Stderr, "Build Commit: "+commitVersion)
 	os.Exit(1)
 }
 
