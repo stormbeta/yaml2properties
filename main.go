@@ -10,28 +10,15 @@ import (
 	"strconv"
 )
 
-func mapTemplatedProperties(filename string) map[string]string {
-	filePath, _ := filepath.Abs(filename)
-	yamlFile, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		panic(err)
-	}
-
-	var properties map[string]interface{}
-	err = yaml.Unmarshal(yamlFile, &properties)
-	if err != nil {
-		panic(err)
-	}
-
-	return mapProperties(properties)
-}
+// Inject from build
+var commitVersion string
 
 // Takes result of yaml parse and returns a flat property map using dot-separated paths
 // IMPORTANT: Requires that the yaml file consist solely of maps and primitives, no arrays
 //            Go's json package can't validate that for us as Go has no concept of higher-level types
-func mapProperties(appMaps map[string]interface{}) map[string]string {
+func flatten(propertiesTree map[string]interface{}) map[string]string {
 	mapped := make(map[string]string)
-	for k, v := range appMaps {
+	for k, v := range propertiesTree {
 		switch v.(type) {
 		case map[interface{}]interface{}:
 			// TODO: Why do I have to construct a new map instead of just being able to do a type assertion here?
@@ -40,7 +27,7 @@ func mapProperties(appMaps map[string]interface{}) map[string]string {
 			for key, val := range v.(map[interface{}]interface{}) {
 				promiseItIsAString[key.(string)] = val
 			}
-			for innerKey, innerValue := range mapProperties(promiseItIsAString) {
+			for innerKey, innerValue := range flatten(promiseItIsAString) {
 				mapped[k+"."+innerKey] = innerValue
 			}
 		case string:
@@ -59,9 +46,6 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "Build Commit: "+commitVersion)
 	os.Exit(1)
 }
-
-// Inject from build
-var commitVersion string
 
 func main() {
 	if len(os.Args) < 2 {
@@ -83,7 +67,7 @@ func main() {
 		panic(err)
 	}
 
-	properties := mapProperties(parsed)
+	properties := flatten(parsed)
 	for prop, path := range properties {
 		fmt.Println(prop + "=" + path)
 	}

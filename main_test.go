@@ -34,7 +34,7 @@ types:
 	if err != nil {
 		panic(err)
 	}
-	propertiesMap := mapProperties(yaml)
+	propertiesMap := flatten(yaml)
 	expected := map[string]string{
 		"a.b":           "leaf2",
 		"a.c.d":         "leaf3",
