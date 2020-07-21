@@ -3,7 +3,7 @@
 export GOFLAGS='-mod=vendor'
 
 if command -v git >/dev/null 2>&1; then
-  gitCommit="$(git show-ref --head HEAD -s)"
+  gitCommit="$(git rev-parse HEAD)"
 else
   gitCommit="$GIT_COMMIT"
 fi
